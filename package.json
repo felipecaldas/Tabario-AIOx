@@ -1,0 +1,44 @@
+{
+  "name": "@fcaldas1/aiox",
+  "version": "0.1.0",
+  "description": "Repo-local agentic SDLC bootstrapper for Tabario-style AI engineering workflows.",
+  "license": "MIT",
+  "author": "Tabario",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tabario/tabario.git",
+    "directory": "aiox"
+  },
+  "homepage": "https://github.com/tabario/tabario/tree/main/aiox#readme",
+  "keywords": [
+    "ai",
+    "agents",
+    "codex",
+    "claude",
+    "gsd",
+    "gstack",
+    "sdlc"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "bin": {
+    "aiox": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "test": "node ./scripts/test.mjs",
+    "doctor": "node ./dist/cli.js doctor",
+    "sync": "node ./dist/cli.js sync",
+    "init": "node ./dist/cli.js init",
+    "upgrade": "node ./dist/cli.js upgrade"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
