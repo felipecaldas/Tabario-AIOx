@@ -316,13 +316,3 @@ npx ./fcaldas1-aiox-0.1.0.tgz init --runtime codex --target "$tmpdir"
 
 The smoke test requires the selected runtime prerequisites.
 
-## Publishing
-
-The package is published as:
-
-```bash
-npm install @fcaldas1/aiox
-npx @fcaldas1/aiox init --runtime codex
-```
-
-The unscoped `aiox` name was rejected by npm as too similar to existing packages. The `@tabario` scope was not available to the publishing account, so the first public package uses the `@fcaldas1` scope.

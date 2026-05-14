@@ -1,6 +1,6 @@
 {
   "name": "@fcaldas1/aiox",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Repo-local agentic SDLC bootstrapper for Tabario-style AI engineering workflows.",
   "license": "MIT",
   "author": "Tabario",
