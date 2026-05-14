@@ -55,6 +55,108 @@ sequenceDiagram
     Agent->>FS: read generated instructions and skills
 ```
 
+## Claude Code Complex Feature Flow
+
+For a complex application feature, the Claude Code flow is intentionally split into specification, planning, locked execution, and review. Ralph should not start until the story and phase plans are explicit and approved.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User
+    participant Claude as Claude Code
+    participant AIOx as AIOx Files
+    participant Linear
+    participant GSD as GSD Workstream
+    participant CRG as code-review-graph
+    participant Review as GStack Review
+    participant Repo as App Repos
+
+    User->>Claude: /tabario-spec "new complex feature"
+    Claude->>AIOx: Read CLAUDE.md and .aiox-core/*
+    Claude->>Linear: Create or resolve parent requirement
+    Claude->>GSD: Create/select workstream
+    Claude->>AIOx: Write docs/stories/TAB-XXX-feature.md
+    Claude->>Linear: Create phase sub-issues
+    Claude-->>User: Report story, phases, affected repos, complexity
+
+    alt Medium or high complexity
+        User->>Claude: /plan-ceo-review
+        Claude->>Review: Challenge product scope and tradeoffs
+        Review-->>Claude: Accepted product changes
+        Claude->>AIOx: Update story assumptions and scope
+    end
+
+    User->>Claude: /tabario-plan TAB-XXX
+    Claude->>GSD: Run gsd-spec-phase for each phase
+    Claude->>GSD: Run gsd-discuss-phase for each phase
+    Claude->>GSD: Run gsd-plan-phase for each phase
+    loop Each affected repo
+        Claude->>CRG: Build/query graph with explicit --data-dir
+        CRG-->>Claude: Impact radius, affected flows, risky dependencies
+        Claude->>GSD: Add graph findings to phase plan
+    end
+    Claude->>Review: /plan-eng-review on story and phase graph
+    Review-->>Claude: Architecture, data-flow, risk, and test feedback
+    Claude->>AIOx: Update story with final phase graph
+    Claude->>Linear: Update phase task acceptance criteria and test gates
+    Claude-->>User: Report execution order and blockers
+
+    User->>Claude: /tabario-ralph TAB-XXX
+    Claude-->>User: Ask for exact approval phrase
+    User->>Claude: APPROVE TAB-XXX FOR TABARIO RALPH
+    Claude->>AIOx: Lock story and write Ralph state
+    Claude->>Linear: Move parent and first ready phase to In Progress
+
+    loop Sequential phase execution
+        Claude->>GSD: Select next ready phase
+        Claude->>CRG: Orient on repo with --repo and --data-dir
+        CRG-->>Claude: Minimal context and blast radius
+        Claude->>Repo: Implement phase changes
+        Claude->>Repo: Run phase tests and checks
+        Claude->>CRG: Refresh graph and verify blast radius
+        Claude->>GSD: Mark phase complete or blocked
+        Claude->>AIOx: Update story progress
+        Claude->>Linear: Update phase task status
+    end
+
+    Claude->>Review: /review before completion
+    Review-->>Claude: Findings or clean result
+    alt Findings exist
+        Claude->>Repo: Fix findings
+        Claude->>Repo: Re-run tests
+        Claude->>Review: Re-run /review
+    end
+    Claude->>Linear: Mark completed work done
+    Claude-->>User: Ralph completion report
+```
+
+Primary Claude Code commands:
+
+- `/tabario-spec`: creates or refreshes the Linear parent, GSD workstream, AIOx story, and phase sub-issues.
+- `/plan-ceo-review`: optional but recommended for medium/high complexity product scope.
+- `/tabario-plan`: creates executable GSD phase plans and updates the AIOx story.
+- `/plan-eng-review`: mandatory engineering review before execution is considered ready.
+- `/tabario-ralph`: locks the approved plan and executes phases.
+- `/review`: mandatory pre-completion review gate.
+- `/tabario-cancel-ralph`: cancels an active Ralph loop and records partial state.
+
+Artifacts created or updated during the flow:
+
+- Linear parent requirement and phase sub-issues
+- `docs/stories/TAB-XXX-*.md`
+- GSD workstream, phase specs, discussion notes, and phase plans
+- code-review-graph context and impact findings
+- `.claude/tabario-ralph.local.md` or equivalent local Ralph state while execution is active
+- repo commits after verification and review
+
+code-review-graph should be run with an explicit graph store outside the repo working tree, for example:
+
+```bash
+code-review-graph build \
+  --repo /path/to/app-repo \
+  --data-dir /home/you/.crg-graphs/app-repo
+```
+
 ## Dependencies And Prerequisites
 
 ### Package Runtime
