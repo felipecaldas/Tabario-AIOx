@@ -321,26 +321,6 @@ ${bulletList([
 `)
   },
   {
-    path: '.claude/skills/story.md',
-    content: generated('Story Skill', `
----
-description: Generate an AIOx story file from a Linear issue.
----
-
-The skill follows the same flow as \`/story\`: read the issue, summarize it, map the repositories, and write the story file.
-`)
-  },
-  {
-    path: '.claude/skills/execute.md',
-    content: generated('Execute Skill', `
----
-description: Execute an approved AIOx story file.
----
-
-The skill follows the approved story and implementation plan, then records the result after verification.
-`)
-  },
-  {
     path: '.claude/rules/commit-workflow.md',
     content: generated('Commit Workflow', `
 ${bulletList([

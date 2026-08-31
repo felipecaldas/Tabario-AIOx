@@ -62,6 +62,30 @@ test('framework file selection is runtime-specific', () => {
   assert.ok(both.includes('.codex/AGENTS.md'));
 });
 
+test('every generated skill is a directory holding SKILL.md', () => {
+  const paths = getFrameworkFiles({ runtime: 'both' }).map((file) => file.path);
+  const skillPaths = paths.filter((file) => /^\.(claude|agents)\/skills\//.test(file));
+
+  assert.ok(skillPaths.length > 0, 'expected the framework to generate at least one skill');
+
+  const skillDirs = new Set();
+  for (const file of skillPaths) {
+    const rest = file.split('/').slice(2);
+    assert.ok(
+      rest.length > 1,
+      `${file} sits directly under a skills root, so skill discovery skips it`
+    );
+    skillDirs.add(file.split('/').slice(0, 3).join('/'));
+  }
+
+  for (const dir of skillDirs) {
+    assert.ok(
+      paths.includes(`${dir}/SKILL.md`),
+      `${dir} has no SKILL.md, so skill discovery skips the whole directory`
+    );
+  }
+});
+
 test('init creates claude files but not codex-only skills', async () => {
   const root = await tempRoot('aiox-claude-');
   const prereqs = await fakePrerequisites();
