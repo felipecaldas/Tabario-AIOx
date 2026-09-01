@@ -103,21 +103,23 @@ function prerequisiteDefinitions(runtime, { homeDir = os.homedir() } = {}) {
   }
 
   if (targets.includes('codex')) {
-    prerequisites.push({
-      id: 'gsd-sdk',
-      runtime: 'codex',
-      label: 'GSD SDK CLI',
-      instruction: 'Install GSD so gsd-sdk is available on PATH, then rerun aiox.',
-      type: 'path-binary',
-      binary: 'gsd-sdk'
-    });
+    // gsd-core installs here. The old `get-shit-done` path this used to check
+    // belonged to the archived repo and no longer exists after the migration,
+    // so doctor failed on a healthy install (TAB-923).
+    //
+    // There is deliberately no PATH-binary check beside this one. gsd-core
+    // ships no executable onto PATH — it is invoked through bin/gsd-tools.cjs
+    // inside this directory. The `gsd-sdk` check that used to sit here passed
+    // only because an npx cache still held get-shit-done-cc, which nothing in
+    // AIOx calls; a check that green-lights a leftover is worse than no check.
     prerequisites.push({
       id: 'gsd-home',
       runtime: 'codex',
       label: 'GSD home',
-      instruction: 'Install GSD so $HOME/.codex/get-shit-done exists, then rerun aiox.',
+      instruction:
+        'Install gsd-core so $HOME/.codex/gsd-core exists, then rerun aiox: npx @opengsd/gsd-core@latest --codex --global --profile=full',
       type: 'directory',
-      path: path.join(homeDir, '.codex', 'get-shit-done')
+      path: path.join(homeDir, '.codex', 'gsd-core')
     });
   }
 

@@ -19,15 +19,17 @@ async function tempRoot(prefix) {
   return mkdtemp(path.join(os.tmpdir(), prefix));
 }
 
+// Every directory a prerequisite check looks for. Keep this in step with
+// prerequisiteDefinitions in src/install.js: the old fixture created
+// `.codex/get-shit-done`, so the suite kept passing against a layout that had
+// stopped existing, and doctor's failure on a healthy box went uncaught
+// (TAB-923).
 async function fakePrerequisites() {
   const homeDir = await tempRoot('aiox-home-');
   const binDir = path.join(homeDir, 'bin');
   await mkdir(path.join(homeDir, '.claude', 'skills', 'gstack', 'bin'), { recursive: true });
-  await mkdir(path.join(homeDir, '.codex', 'get-shit-done'), { recursive: true });
+  await mkdir(path.join(homeDir, '.codex', 'gsd-core'), { recursive: true });
   await mkdir(binDir, { recursive: true });
-
-  const gsdSdk = path.join(binDir, 'gsd-sdk');
-  await writeFile(gsdSdk, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
 
   return {
     homeDir,
@@ -191,7 +193,7 @@ test('missing prerequisites cause hard failures for affected targets', async () 
   try {
     await assert.rejects(
       () => initWorkspace({ workspaceRoot: root, runtime: 'codex', homeDir, env: { PATH: '' } }),
-      /GSD SDK CLI/
+      /GSD home/
     );
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -212,7 +214,7 @@ test('doctor --json includes missing prerequisite details', async () => {
     });
     assert.equal(result.code, 1);
     assert.equal(result.json.ok, false);
-    assert.deepEqual(result.json.missingPrerequisites.map((item) => item.id), ['gsd-sdk', 'gsd-home']);
+    assert.deepEqual(result.json.missingPrerequisites.map((item) => item.id), ['gsd-home']);
   } finally {
     await rm(root, { recursive: true, force: true });
     await rm(homeDir, { recursive: true, force: true });
